@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>大事件-后台登录页</title>
+  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <link rel="stylesheet" type="text/css" href="css/iconfont.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+
+<body>
+  <div class="main_wrap">
+    <div class="header">
+      <a href="#" class="logo"><img src="images/logo.png" alt=""></a>
+      <div class="copyright">CopyRight © 2019 深圳百秀信息技术股份有限公司<br>All Rights Reserved</div>
+    </div>
+
+    <div class="login_form_con">
+      <div class="login_title"></div>
+      <form class="login_form">
+        <i class="iconfont icon-user"></i>
+        <i class="iconfont icon-key"></i>
+        <input type="text" class="input_txt" placeholder="邮箱/手机号">
+        <input type="password" class="input_pass" placeholder="密码">
+        <!-- <input type="submit" class="input_sub" value="登 录"> -->
+        <input type="button" class="input_sub" value="登 录">
+      </form>
+    </div>
+
+  </div>
+
+  <script src="./js/jquery-1.12.4.min.js"></script>
+  <!-- 引入配置文件 -->
+  <script src="./tool/config.js"></script>
+
+  <script>
+    /*
+      结构的修改:
+        登录按钮时submit功能的，我们希望使用ajax，应当更改为普通按钮
+          - 或者 e.preventDefault()
+
+      功能简介：
+        1 点击登录按钮后，获取用户名和密码
+        2 检测内容是否为空
+        3 如果不为空，通过接口发送给服务端检测
+        4 根据检测结果进行对应处理
+          - 成功：跳转到首页
+          - 失败：提示即可
+    */
+
+    // 实现功能：
+    // 1 给登录按钮设置点击事件
+    $('.input_sub').on('click', function () {
+      // 2 获取用户名和密码并进行检测
+      var user_name = $('.input_txt').val();
+      var password = $('.input_pass').val();
+
+      // trim是字符串方法，可以去除两端空格
+      if (user_name.trim() === '' || password.trim() === '') {
+        alert('请完整填写表单!~');
+        return;
+      }
+
+      // 3 发送请求
+      $.ajax({
+        type: 'post',
+        url:USER_LOGIN,
+        data: {
+          user_name: user_name,
+          password: password
+        },
+        success: function (res) {
+          // 4 根据服务端响应的状态进行对应操作
+          if (res.code === 200) {
+            location.href = './index.html';
+          } else {
+            alert('用户名或密码错误!~');
+          }
+        }
+      });
+    });
+
+
+
+  </script>
+</body>
+
+</html>
