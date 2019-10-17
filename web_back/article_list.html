@@ -23,16 +23,16 @@
                 <div class="col-xs-6">
                     <form class="form-inline">
                         <select id="selCategory" name="" class="form-control input-sm">
-                            <option>所有分类</option>
-                            <option>未分类</option>
+                            <option value=''>所有分类</option>
+                            <!-- <option>未分类</option>
                             <option>奇趣事</option>
                             <option>会生活</option>
-                            <option>爱旅行</option>
+                            <option>爱旅行</option> -->
                         </select>
                         <select id="selStatus" name="" class="form-control input-sm">
-                            <option>所有状态</option>
-                            <option value="drafted">草稿</option>
-                            <option value="published">已发布</option>
+                            <option value=''>所有状态</option>
+                            <option value="草稿">草稿</option>
+                            <option value="已发布">已发布</option>
                         </select>
                         <button id="btnSearch" class="btn btn-default btn-sm">筛选</button>
                     </form>
@@ -57,7 +57,7 @@
 
 
 
-                    <tr>
+                    <!-- <tr>
                         
                         <td>王积千造统最头</td>
                         <td>杰克</td>
@@ -229,52 +229,152 @@
 
 
                     <tr>
-                      
                         <td>日做发光成</td>
                         <td>管理员</td>
                         <td>爱旅行</td>
                         <td class="text-center">2017-01-26 22:19:59</td>
-
-
                         <td class="text-center">草稿</td>
-
-
                         <td class="text-center">
                             <a href="post-edit.html?id=995" class="btn btn-default btn-xs">编辑</a>
                             <a href="javascript:deleteTr( 995 );" class="btn btn-danger btn-xs">删除</a>
                         </td>
-                    </tr>
+                    </tr> -->
 
 
                 </tbody>
             </table>
 
             <div class="row text-center">
-            <ul class="pagination pagination-sm">
-                <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
-                <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
-                <li class="page-item active"><a href="#" class="page-link">1</a></li>
-                <li class="page-item"><a href="#" class="page-link">2</a></li>
-                <li class="page-item"><a href="#" class="page-link">3</a></li>
-                <li class="page-item"><a href="#" class="page-link">4</a></li>
-                <li class="page-item"><a href="#" class="page-link">5</a></li>
-                <li class="page-item"><a href="#" class="page-link">6</a></li>
-                <li class="page-item"><a href="#" class="page-link">7</a></li>
-                <li class="page-item next"><a href="#" class="page-link">下一页</a></li>
-                <li class="page-item last"><a href="#" class="page-link">尾页</a></li>
-            </ul>
-        </div>
+                <ul class="pagination pagination-sm">
+                    <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
+                    <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
+                    <li class="page-item active"><a href="#" class="page-link">1</a></li>
+                    <li class="page-item"><a href="#" class="page-link">2</a></li>
+                    <li class="page-item"><a href="#" class="page-link">3</a></li>
+                    <li class="page-item"><a href="#" class="page-link">4</a></li>
+                    <li class="page-item"><a href="#" class="page-link">5</a></li>
+                    <li class="page-item"><a href="#" class="page-link">6</a></li>
+                    <li class="page-item"><a href="#" class="page-link">7</a></li>
+                    <li class="page-item next"><a href="#" class="page-link">下一页</a></li>
+                    <li class="page-item last"><a href="#" class="page-link">尾页</a></li>
+                </ul>
+            </div>
 
         </div>
     </div>
+    <script src="./tool/config.js"></script>
+    <script src="./tool/article.js"></script>
+    <script src="./js/template-web.js"></script>
+    <script src="./js/jquery.twbsPagination.js"></script>
+    <script type="text/html" id='active'>
+
+
+        {{each data v}}
+        <tr>
+            <td>{{v.title}}</td>
+            <td>{{v.author}}</td>
+            <td>{{v.type}}</td>
+            <td class="text-center">{{v.date}}</td>
+            <td class="text-center">{{v.state}}</td>
+            <td class="text-center">
+                <a href="post-edit.html?id=995" class="btn btn-default btn-xs bianji" data-id="{{v.id}}">编辑</a>
+                <a href="javascript:;" class="btn btn-danger btn-xs del" data-id="{{v.id}}">删除</a>
+            </td>
+        </tr>
+        {{/each}} 
+    </script>
 
     <script>
         // 设置左侧菜单
-        $('#release_btn').click(function(){
-            window.parent.setMenu(1,1);
+        $('#release_btn').click(function () {
+            window.parent.setMenu(1, 1);
         })
     </script>
+    <script type="text/html" id="xiala">
+        {{each data v}}
+        <option value="{{v.id}}">{{v.name}}</option>
+        {{/each}}
+    </script>
+    <script>
+        var myTotalPage;
+        var myPage = 1;
+        getDate()
+        function getDate() {
+            article.article_xuan({
+                data: {
+                    type: $('#selCategory').val(),
+                    state: $('#selStatus').val(),
+                    page: myPage,
+                },
+                callback: function (res) {
 
+                    if (res.code === 200) {
+                        var strhtml = template('active', res)
+                        $('tbody').html(strhtml)
+                      
+
+                        if (res.totalPage === myTotalPage) {
+                            // - 如果上一次和当前的总页数一致，同时上一次又点击了除1以外的其他页码
+                            //   - 会导致页码无法更新为1，所以就不进行改进了
+                            return;
+                        }
+                        myTotalPage = res.totalPage
+                        $('.pagination').twbsPagination('destroy')
+                        $('.pagination').twbsPagination({
+                            totalPages: myTotalPage,
+                            visiblepages: 5,
+                            first: '首页',
+                            last: '尾页',
+                            prev: '上一页',
+                            next: '下一页',
+                            onPageClick: function (event, page) {
+                                myPage = page;
+                                getDate()
+                            }
+                        })
+                    }
+                }
+            })
+        }
+
+
+
+        article.article_search({
+            callback: function (res) {
+                if (res.code === 200) {
+                    var htmlStr = template('xiala', res)
+                    $('#selCategory').append(htmlStr)
+
+                }
+            }
+        })
+        $('#btnSearch').on('click', function (e) {
+            e.preventDefault()
+
+            getDate()
+            $('.first').click();
+
+        })
+        $('tbody').on('click','.del', function () {
+            var trs = $(this).parents('tr')
+            var id=$(this).data('id')
+            console.log(id)
+          article.article_delete({
+              data:{
+                  id:id
+              },
+              callback:function(res){
+                  console.log(res)
+                 trs.remove()
+                 getDate()
+              }
+          })
+        })
+
+
+
+
+    </script>
 </body>
 
 </html>

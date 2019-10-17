@@ -102,65 +102,105 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" id="model_shutoff">关闭</button>
                     <button type="button" class="btn btn-primary" id="model_add">新增</button>
+                    <button type="button" class="btn btn-primary" id="model_del" style="display:none;">修改</button>
                 </div>
             </div>
         </div>
     </div>
     <script src="./js/template-web.js"></script>
-    <script type=text/html id='category'> 
+    <script type=text/html id='category'>
         {{each data v i}}
         <tr>
         <td>{{v.name}}</td>
         <td>{{v.slug}}</td>
         <td class="text-center">
         <a href="javascript:;"
-        class="btn btn-info btn-xs bianji" >编辑</a>
-        <a href="javascript:deleteTr( 1 );" class="btn btn-danger btn-xs del" >删除</a>
+        class="btn btn-info btn-xs bianji" data-id={{v.id}}>编辑</a>
+        <a href="javascript:;" class="btn btn-danger btn-xs dele" data-id={{v.id}}>删除</a>
         </td>
     </tr>
     {{/each}}
-
-
 </script>
-
+    <script src="./tool/article.js"></script>
+    <script src="./tool/config.js"></script>
     <script>
-        //文章类别的获取‘http://localhost:8000/admin/category_search’
-        //模板引擎
-
-        $.ajax({
-            url: 'http://localhost:8000/admin/category_search',
-            success: function (res) {
+        article.article_search({
+            callback: function (res) {
                 if (res.code == 200) {
-                    var htmlstr=template('category',res )
-                    $('tbody').html( htmlstr)
+                    var htmlstr = template('category', res)
+                    $('tbody').html(htmlstr)
                 }
             }
         })
-        $('#model_add').on('click',function(){
-           name1= $('#recipient-name1').val();
-             name2=$('#recipient-name2').val();
-            console.log(name1,name2)
-            if(!name1.trim()||!name2.trim()){
+        $('#model_add').on('click', function () {
+            name1 = $('#recipient-name1').val();
+            name2 = $('#recipient-name2').val();
+            console.log(name1, name2)
+            if (!name1.trim() || !name2.trim()) {
                 alert('填写完整')
                 return;
             }
-            $.ajax({
-                type:'post',
-                url:'http://localhost:8000/admin/category_add',
-                data:{
-                    name:name1,
-                    slug:name2
+            article.article_add({
+                name: name1,
+                slug: name2,
+                callback: function (res) {
+                    console.log(res)
+                    if (res.code == 200) {
+                        location.reload()
+                    }
+                }
+            }
+            )
+        })
+        $('tbody').on('click', '.bianji', function () {
+            $('#addModal').modal('show')
+            var id = $(this).data('id');
+            $('#model_add').hide()
+            $('#model_del').show()
+            $('#model_del').data('id', id);
+            var trs = $(this).parent().siblings()
+            var name = trs[0].innerHTML
+            var slug = trs[1].innerHTML
+            $('#recipient-name1').val(name)
+            $('#recipient-name2').val(slug)
+        })
+        $('#model_del').on('click', function () {
+            var id = $(this).data('id')
+            var name = $('#recipient-name1').val();
+            var slug = $('#recipient-name2').val();
+            if (name == '' || slug == '') {
+                alert('请完整填写表单');
+                return;
+            }
+            article.article_edlt({
+                data: {
+                    name: name,
+                    id: id,
+                    slug: slug,
                 },
-                success:function(res){
-                    if(res.code==200){
-                      location.reload()
+                callback: function (res) {
+                    if (res.code == 200) {
+                        location.reload()
                     }
                 }
             })
         })
-        $('tbody').on('click','.bianji',function(){
-            console.log(1)
-            $('#addModal').modal('show')
+        $('tbody').on('click', '.dele', function () {
+            var flag = confirm('确定要删除吗')
+            var tr = $(this).parents('tr')
+            var id = $(this).data('id')
+            console.log(id)
+            article.article_del({
+                data: {
+                    id: id
+                },
+                callback: function (res) {
+                    console.log(res)
+                    if (flag && res.code == 200) {
+                        tr.remove()
+                    }
+                }
+            })
         })
     </script>
 </body>
